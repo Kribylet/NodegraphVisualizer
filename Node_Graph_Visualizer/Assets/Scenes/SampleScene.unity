@@ -177,8 +177,8 @@ MonoBehaviour:
   voxelStrategy:
     voxelScope: 0
     ComponentResDivider: 7
-    GraphVoxelDeviationThreshold: 0
-    mergeThreshold: 0
+    GraphVoxelDeviationThreshold: 2
+    mergeThreshold: 3
     peelFactor: 0.3
   drawer: {fileID: 11400000, guid: 921c3c064be577a4886cfe3ec979fa66, type: 2}
 --- !u!4 &236857525
