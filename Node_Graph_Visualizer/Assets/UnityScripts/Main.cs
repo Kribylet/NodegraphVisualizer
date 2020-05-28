@@ -24,6 +24,7 @@ public struct DrawStructure
 public struct GraphStrategy
 {
     public Strategy strategy;
+    public bool writeXML;
 }
 
 public enum Strategy
@@ -278,6 +279,26 @@ public class Main : MonoBehaviour
             }
         }
         drawTimer.Stop();
+
+        if (graphStrategy.writeXML && !(graphStrategy.strategy == Strategy.XML))
+        {
+            if (nodeGraphs.Count == 1)
+            {
+                string filename = System.IO.Path.GetFileNameWithoutExtension(AssetDatabase.GetAssetPath(files.modelFile));
+                filename += ".xml";
+                XMLCreator.writeXML(nodeGraphs[0], System.IO.Path.Combine("Assets", "XML", filename));
+            }
+            else
+            {
+                string filename = System.IO.Path.GetFileNameWithoutExtension(AssetDatabase.GetAssetPath(files.modelFile));
+                int counter = 1;
+                foreach (NodeGraph nodeGraph in nodeGraphs)
+                {
+                    string subfilename = filename + (counter++) + ".xml";
+                    XMLCreator.writeXML(nodeGraphs[0], System.IO.Path.Combine("Assets", "XML", subfilename));
+                }
+            }
+        }
 
         ReportProcessTimes();
     }
