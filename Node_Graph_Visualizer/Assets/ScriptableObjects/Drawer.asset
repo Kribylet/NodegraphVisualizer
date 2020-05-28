@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca930cb11861c374e85cffd65d6e244b, type: 3}
+  m_Name: Drawer
+  m_EditorClassIdentifier: 
+  vertexPrefab: {fileID: 1879388496461865685, guid: 32f266bf81a29c344bc4964b897fa946,
+    type: 3}
+  nodePrefab: {fileID: 7517891183042306405, guid: e7eb2cfbc39cee649bfbab0e419ccb7d,
+    type: 3}
+  faceMiddlePointPrefab: {fileID: 1286155589246549883, guid: ac8b968e5149283639ced3a38f77c406,
+    type: 3}
+  cubePrefab: {fileID: 6450686047414815561, guid: 78770f9b3db911d7ab36bd5937f7a847,
+    type: 3}
+  collisionPrefab: {fileID: 1750446455941680158, guid: f24b83e4daa6e6d4e9c995a9651bb72a,
+    type: 3}
+  bBoxPrefab: {fileID: 3545693370729739849, guid: d12f4421cfb1fe1a79efb36c6d4a3686,
+    type: 3}
+  scalingFactor: 1000
