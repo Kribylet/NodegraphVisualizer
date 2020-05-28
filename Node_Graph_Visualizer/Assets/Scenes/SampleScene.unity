@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.44657826, g: 0.49641263, b: 0.57481676, a: 1}
+  m_IndirectSpecularColor: {r: 0.4465785, g: 0.49641252, b: 0.574817, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -131,7 +131,7 @@ GameObject:
   - component: {fileID: 236857525}
   - component: {fileID: 236857524}
   m_Layer: 0
-  m_Name: MainHolder
+  m_Name: Settings
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -162,11 +162,11 @@ MonoBehaviour:
   drawNodeGraph:
     drawNodes: 1
     drawEdges: 1
+    drawAsTunnels: 0
   drawVoxels:
     drawVoxels: 0
     fillInternalVolume: 0
     skeletalize: 0
-    cutToFloor: 0
   drawOBBs:
     oBBType: 0
     oBBDrawType: 0
@@ -176,6 +176,9 @@ MonoBehaviour:
   voxelStrategy:
     voxelScope: 0
     ComponentResDivider: 7
+    GraphVoxelDeviationThreshold: 0
+    mergeThreshold: 0
+    peelFactor: 0
   drawer: {fileID: 11400000, guid: 921c3c064be577a4886cfe3ec979fa66, type: 2}
 --- !u!4 &236857525
 Transform:
