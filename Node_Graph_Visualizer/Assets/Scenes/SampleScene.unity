@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.4465785, g: 0.49641252, b: 0.574817, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -150,19 +150,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   files:
-    modelFile: {fileID: -927199367670048503, guid: c70fb21240d00792099b7d33e3ec8151,
+    modelFile: {fileID: -927199367670048503, guid: aef230167f214c826bcbc5ffcc8ff295,
       type: 3}
-    XMLFile: {fileID: 4900000, guid: e2bc2d8bfb8794d448b4e1d5362c51df, type: 3}
+    XMLFile: {fileID: 4900000, guid: 96506b66762a84c48b016e4a47db66a5, type: 3}
   graphStrategy:
-    strategy: 1
+    strategy: 2
+    writeXML: 1
   drawStructure:
-    drawVertices: 1
+    drawVertices: 0
     drawFaces: 0
     colorFloor: 0
   drawNodeGraph:
     drawNodes: 1
     drawEdges: 1
-    drawAsTunnels: 0
+    drawAsTunnels: 1
   drawVoxels:
     drawVoxels: 0
     fillInternalVolume: 0
@@ -178,7 +179,7 @@ MonoBehaviour:
     ComponentResDivider: 7
     GraphVoxelDeviationThreshold: 0
     mergeThreshold: 0
-    peelFactor: 0
+    peelFactor: 0.3
   drawer: {fileID: 11400000, guid: 921c3c064be577a4886cfe3ec979fa66, type: 2}
 --- !u!4 &236857525
 Transform:
