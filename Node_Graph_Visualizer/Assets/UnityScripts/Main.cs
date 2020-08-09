@@ -48,6 +48,7 @@ public struct DrawVoxels
     public bool drawVoxels;
     public bool fillInternalVolume;
     public bool skeletalize;
+    public bool peel;
 }
 
 [Serializable]
@@ -162,6 +163,10 @@ public class Main : MonoBehaviour
                        {
                            skeletonGrids.Add((VoxelGridGraphGenerator.GenerateSkeletalGrid(voxelGrid), voxelGrid));
                        }
+                       else if (drawVoxels.peel)
+                       {
+                           skeletonGrids.Add((VoxelGridGraphGenerator.GeneratePeeledGrid(voxelGrid), voxelGrid));
+                       }
                        gridProcessingTimer.Stop();
                    }
                    voxelGrids.Add(voxelGrid);
@@ -173,7 +178,7 @@ public class Main : MonoBehaviour
                 VoxelGrid voxelGrid = new VoxelGrid(structure, plane1Normal: Vect3.Right, plane2Normal: Vect3.Up, plane3Normal: Vect3.Forward);
                 gridTimer.Stop();
                 gridProcessingTimer.Start();
-                if (draw || drawVoxels.fillInternalVolume || drawVoxels.skeletalize)
+                if (draw || drawVoxels.fillInternalVolume || drawVoxels.skeletalize || drawVoxels.peel)
                 {
                     voxelGrid.FillInternalVolume(structure);
                 }
@@ -191,6 +196,10 @@ public class Main : MonoBehaviour
                     if (drawVoxels.skeletalize)
                     {
                         skeletonGrids.Add((VoxelGridGraphGenerator.GenerateSkeletalGrid(voxelGrid), voxelGrid));
+                    }
+                    if (drawVoxels.peel)
+                    {
+                        skeletonGrids.Add((VoxelGridGraphGenerator.GeneratePeeledGrid(voxelGrid), voxelGrid));
                     }
                     gridProcessingTimer.Stop();
                 }
@@ -255,7 +264,7 @@ public class Main : MonoBehaviour
 
         if (drawVoxels.drawVoxels)
         {
-            if (drawVoxels.skeletalize)
+            if (drawVoxels.skeletalize || drawVoxels.peel)
             {
                 foreach (var skeletonGrid in skeletonGrids)
                 {
