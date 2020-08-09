@@ -611,7 +611,7 @@ namespace Nodegraph_Generator
                 double currentSmallestDistance = Double.PositiveInfinity;
                 foreach (Plane plane in candidatePlanes)
                 {
-
+                    if (plane.normal == Vect3.Zero) continue;
                     FindPlaneDistances(out greatestPositiveDistance, out greatestNegativeDistance,
                                     points, plane.normal, plane.offset);
 

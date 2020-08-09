@@ -339,13 +339,14 @@ namespace Nodegraph_Generator
             }
         }
 
-        /**
-         * From a voxel-shelled component, fills all internal volume.
-         * Expects component to atleast to have a filled floor and roof.
+        /*
+         * Fills internal volume of voxels by finding points in the voxel grid captured
+         * by a mesh. Relies on the original meshes to perform odd/even polygon capture calculation.
+         *
+         * https://en.wikipedia.org/wiki/Point_in_polygon
          */
         public void FillInternalVolume(Component component)
         {
-
             OrientedBBox componentOBB = componentOBBs[component.index];
 
             List<Vect3> points = new List<Vect3>();
@@ -357,42 +358,91 @@ namespace Nodegraph_Generator
 
             VoxelSpan componentVoxelSpan = new VoxelSpan(points, this, BorderOffset);
 
-            int firstYFilled;
-            int lastYFilled;
-
-            double voxelsInOBB = 0;
-            double filledVoxelsInOBB = 0;
-
             for (int x = componentVoxelSpan.minX; x < componentVoxelSpan.maxX; x++)
             {
                 for (int z = componentVoxelSpan.minZ; z < componentVoxelSpan.maxZ; z++)
                 {
-                    firstYFilled = 0;
-                    lastYFilled = 0;
-
                     for (int y = componentVoxelSpan.minY; y < componentVoxelSpan.maxY; y++)
                     {
-                        Vect3 globalPos = voxelStartCoordinate +
-                                            orientedBbox.localX * x * resolution +
-                                            orientedBbox.localY * y * resolution +
-                                            orientedBbox.localZ * z * resolution;
-
-                        if (!componentOBB.ContainsGlobalCoordinate(globalPos, OrientedBBoxExpansionFactor)) continue;
-
-                        voxelsInOBB += 1;
-                        if (coordinateGrid[x][y][z])
+                        if (!coordinateGrid[x][y][z] && coordinateGrid[x][Math.Max(0,y-1)][z])
                         {
-                            filledVoxelsInOBB += 1;
+                            Vect3 globalPos = voxelStartCoordinate +
+                                                orientedBbox.localX * x * resolution +
+                                                orientedBbox.localY * y * resolution +
+                                                orientedBbox.localZ * z * resolution;
 
-                            if (firstYFilled == 0) firstYFilled = y;
-                            lastYFilled = y;
+                            if (!componentOBB.ContainsGlobalCoordinate(globalPos, OrientedBBoxExpansionFactor)) continue;
+
+                            int intersects = 0;
+                            foreach (Face face in component.faces)
+                            {
+                                Vect3 triA = component.GetCoordinate(face.vertexIndices[0]);
+                                Vect3 triB = component.GetCoordinate(face.vertexIndices[1]);
+                                Vect3 triC = component.GetCoordinate(face.vertexIndices[2]);
+
+                                // if (intersect_triangle(globalPos, Vect3.Up, triA, triB, triC))
+                                if (rayIntersectsTriangle(globalPos, Vect3.Up, triA, triB, triC))
+                                {
+                                    intersects++;
+                                }
+                            }
+
+                            if ((intersects % 2) != 0)
+                            {
+                                int rise = 0;
+                                while (!coordinateGrid[x][y+rise][z])
+                                {
+                                    coordinateGrid[x][y+rise][z] = true;
+                                    rise++;
+                                }
+                            }
+                            else if (intersects == 0)
+                            {
+                                // If there is no intersecting surface above whatsoever, this column cannot
+                                // contain points that are inside a polygon.
+                                break;
+                            }
                         }
                     }
-
-                    if (firstYFilled != 0) FillColumnY(x, z, firstYFilled, lastYFilled);
                 }
             }
         }
+
+
+        /*
+         * Calculates Line/Face intersections using the Möller-Trumbore intersection algorithm.
+         *
+         * https://en.wikipedia.org/wiki/Möller–Trumbore_intersection_algorithm
+         */
+        public static bool rayIntersectsTriangle(Vect3 rayOrigin,
+                                            Vect3 rayVector,
+                                            Vect3 vertex0,
+                                            Vect3 vertex1,
+                                            Vect3 vertex2) {
+        double EPSILON = 1e-6;
+        Vect3 edge1 = vertex1 - vertex0;
+        Vect3 edge2 = vertex2 - vertex0;
+        double a, f, u, v;
+        Vect3 h = Vect3.Cross(rayVector, edge2);
+        a = Vect3.Dot(edge1, h);
+        if (a > -EPSILON && a < EPSILON) {
+            return false;    // This ray is parallel to this triangle.
+        }
+        f = 1.0 / a;
+        Vect3 s = rayOrigin - vertex0;
+        u = f * Vect3.Dot(s,h);
+        if (u < 0.0 || u > 1.0) {
+            return false;
+        }
+        Vect3 q = Vect3.Cross(s, edge1);
+        v = f * Vect3.Dot(rayVector, q);
+        if (v < 0.0 || u + v > 1.0) {
+            return false;
+        }
+        double t = f * Vect3.Dot(edge2, q);
+
+        return t > EPSILON;
+    }
 
         private void FillColumnY(int x, int z, int firstYFilled, int lastYFilled)
         {
@@ -405,6 +455,22 @@ namespace Nodegraph_Generator
         public Vect3 VoxelPositionAsCoordinate(Point3 point)
         {
             return VoxelPositionAsCoordinate(point.x, point.y, point.z);
+        }
+
+
+        /*
+         * Retrieves the lowest filled voxel grid position that shares the same XZ-coordinates
+         * as the provided voxel coordinate.
+         */
+        public Vect3 LowestPositionAtCoordinate(Point3 point)
+        {
+            int lower = 0;
+            while (coordinateGrid[point.x][point.y-lower-1][point.z])
+            {
+                lower++;
+            }
+            int lowestY = point.y - lower;
+            return VoxelPositionAsCoordinate(point.x, lowestY, point.z);
         }
 
         public Vect3 VoxelPositionAsCoordinate(int x, int y, int z)

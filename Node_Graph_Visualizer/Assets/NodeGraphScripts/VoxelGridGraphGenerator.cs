@@ -8,7 +8,7 @@ namespace Nodegraph_Generator
         private const double SquareRootOfThree = 1.73d;
         public static double VoxelDistanceThreshold = 2d;
         public static double mergeThreshold = 3d;
-        public static double outerLayerLimit = 0.3d; // Controls how much of the grids approximate radius is considered external as percentage of diameter. (50% diameter == 100% radius)
+        public static double outerLayerLimit = 0d; // Controls how much of the grids approximate radius is considered external as percentage of diameter. (50% diameter == 100% radius)
 
         /*
          * Generate a NodeGraph for an entire Structure using VoxelStrategy
@@ -37,7 +37,6 @@ namespace Nodegraph_Generator
             DistanceGrid distanceGrid = new DistanceGrid(voxelGrid);
 
             Skeletonize(distanceGrid, voxelGrid);
-            MoveGridToFloor(distanceGrid, voxelGrid);
 
             NodeGraph nodeGraph = CreateNodeGraph(distanceGrid, voxelGrid);
             nodeGraph = MergeNodeGraph(nodeGraph, voxelGrid);
@@ -72,26 +71,6 @@ namespace Nodegraph_Generator
             return nodeGraph;
         }
 
-        public static void MoveGridToFloor(DistanceGrid distanceGrid, VoxelGrid voxelGrid)
-        {
-            for (int x = 1; x < voxelGrid.xBound - 1; x++)
-            {
-                for (int y = 1; y < voxelGrid.yBound - 1; y++)
-                {
-                    for (int z = 1; z < voxelGrid.zBound - 1; z++)
-                    {
-                        if (distanceGrid.grid[x][y][z] != 0)
-                        {
-                            int offsetY = 0;
-                            while (voxelGrid.coordinateGrid[x][y + offsetY - 1][z]) offsetY--;
-                            distanceGrid.grid[x][y + offsetY][z] = distanceGrid.grid[x][y][z];
-                            distanceGrid.grid[x][y][z] = 0;
-                        }
-                    }
-                }
-            }
-        }
-
         /**
          * Can be used when visualising in Unity.
          */
@@ -101,7 +80,17 @@ namespace Nodegraph_Generator
 
             Skeletonize(distanceGrid, voxelGrid);
 
-            MoveGridToFloor(distanceGrid, voxelGrid);
+            return distanceGrid;
+        }
+
+        /**
+         * Can be used when visualising in Unity.
+         */
+        public static DistanceGrid GeneratePeeledGrid(VoxelGrid voxelGrid)
+        {
+            DistanceGrid distanceGrid = new DistanceGrid(voxelGrid);
+
+            ThinByDistanceMapping(distanceGrid, voxelGrid);
 
             return distanceGrid;
         }
@@ -224,7 +213,7 @@ namespace Nodegraph_Generator
 
             Point3 initialPoint = startPoints.Peek().Item1;
 
-            nodeGraph.AddNode(voxelGrid.VoxelPositionAsCoordinate(initialPoint));
+            nodeGraph.AddNode(voxelGrid.LowestPositionAtCoordinate(initialPoint));
             visitedGrid[initialPoint.x][initialPoint.y][initialPoint.z] = true;
 
             //Breadth-first traversing of the Voxels
@@ -235,8 +224,8 @@ namespace Nodegraph_Generator
                 //Special case for when connecting to an allready visited node
                 if (visitedGrid[currentPoint.x][currentPoint.y][currentPoint.z])
                 {
-                    Vect3 pos1 = voxelGrid.VoxelPositionAsCoordinate(startPoint);
-                    Vect3 pos2 = voxelGrid.VoxelPositionAsCoordinate(currentPoint);
+                    Vect3 pos1 = voxelGrid.LowestPositionAtCoordinate(startPoint);
+                    Vect3 pos2 = voxelGrid.LowestPositionAtCoordinate(currentPoint);
 
                     Node startNode = nodeGraph.GetNode(pos1);
                     Node currentNode = nodeGraph.GetNode(pos2);
@@ -274,8 +263,8 @@ namespace Nodegraph_Generator
 
                 List<Point3> pathPoints = new List<Point3>(){startPoint};
 
-                Vect3 startCoordinate = voxelGrid.VoxelPositionAsCoordinate(startPoint);
-                Vect3 currentCoordinate = voxelGrid.VoxelPositionAsCoordinate(currentPoint);
+                Vect3 startCoordinate = voxelGrid.LowestPositionAtCoordinate(startPoint);
+                Vect3 currentCoordinate = voxelGrid.LowestPositionAtCoordinate(currentPoint);
 
                 List<Vect3> intermediateCoords = new List<Vect3>();
 
@@ -296,6 +285,7 @@ namespace Nodegraph_Generator
                     }
 
                     neighbors = distanceGrid.Get26AdjacentNeighbors(currentPoint);
+                    pathPoints.Add(currentPoint);
 
                     if (neighbors.Count != 2)
                     {
@@ -305,11 +295,11 @@ namespace Nodegraph_Generator
                     }
 
                     // Only one new neighbor
-                    intermediateCoords.Add(voxelGrid.VoxelPositionAsCoordinate(currentPoint));
+                    intermediateCoords.Add(voxelGrid.LowestPositionAtCoordinate(currentPoint));
 
                     Point3 temp = currentPoint;
                     currentPoint = neighbors[0] == cameFrom ? neighbors[1] : neighbors[0];
-                    currentCoordinate = voxelGrid.VoxelPositionAsCoordinate(currentPoint);
+                    currentCoordinate = voxelGrid.LowestPositionAtCoordinate(currentPoint);
                     cameFrom = temp;
 
                     visitedGrid[cameFrom.x][cameFrom.y][cameFrom.z] = true;
